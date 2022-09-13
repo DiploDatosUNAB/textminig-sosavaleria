@@ -9,11 +9,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 # Cargar las librerías necesarias
-library(__________) #Para usar dplyr
-library(__________) #Para usar tidytext
+library(dplyr)
+library(tidytext)
 library(wordcloud2)
 library(tm)
 library(readr)
+library(purrr)
 ```
 
 ## Nube de Palabras
@@ -25,7 +26,7 @@ Tenemos en el archivo `rladies_meetup.csv` los títulos de los eventos de R-Ladi
 EL primer paso es leer el archivo que tiene todos los titulos de meetups de r-ladies. **Completen este código para que se lea el archivo "rladies_meetups.csv"**
 
 ```{r}
-titulos <- ________("rladies_meetups.csv")
+titulos <- read.csv("rladies_meetups.csv")
 
 ```
 
@@ -39,7 +40,7 @@ idiomas <- list('spanish', 'portuguese', 'french', 'danish', 'dutch', 'finnish',
 variosIdiomas_stop_words <- idiomas %>% 
   map(tm::stopwords) %>%
   flatten_dfc() %>% 
-  gather(var, word) %>%
+  pivot_longer(var, word) %>%
   bind_rows(stop_words) %>%
   select(word, lexicon)
 
