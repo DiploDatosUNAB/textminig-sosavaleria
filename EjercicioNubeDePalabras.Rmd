@@ -9,11 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 # Cargar las librerías necesarias
-library(__________) #Para usar dplyr
-library(__________) #Para usar tidytext
+library(dplyr)
+library(tidytext)
 library(wordcloud2)
 library(tm)
 library(readr)
+library(purrr)
+library (tidyverse)
 ```
 
 ## Nube de Palabras
@@ -25,7 +27,7 @@ Tenemos en el archivo `rladies_meetup.csv` los títulos de los eventos de R-Ladi
 EL primer paso es leer el archivo que tiene todos los titulos de meetups de r-ladies. **Completen este código para que se lea el archivo "rladies_meetups.csv"**
 
 ```{r}
-titulos <- ________("rladies_meetups.csv")
+titulos <- read.csv("rladies_meetups.csv")
 
 ```
 
@@ -36,12 +38,13 @@ Ahora necesitamos filtrar **stop words** en varios idiomas (porque no solo hay c
 ```{r}
 idiomas <- list('spanish', 'portuguese', 'french', 'danish', 'dutch', 'finnish', 'german', 'hungarian', 'italian', 'norwegian', 'russian', 'swedish')
 
-variosIdiomas_stop_words <- idiomas %>% 
-  map(tm::stopwords) %>%
-  flatten_dfc() %>% 
-  gather(var, word) %>%
-  bind_rows(stop_words) %>%
-  select(word, lexicon)
+variosIdiomas_stop_words <- idiomas %>%
+map(tm::stopwords) %>%
+flatten_dfc() %>%
+pivot_longer(cols = everything(),
+values_to = "word") %>%
+bind_rows(stop_words) %>%
+select(word, lexicon)
 
 ```
 
@@ -57,10 +60,10 @@ Completa el código para poder obtener el conjunto de datos `palabras` para lueg
   
 ```{r}
 palabras <- titulos %>%
-  _____________(word, titulo) %>%
-  _____________(variosIdiomas_stop_words) %>%
+  unnest_tokens(word,X.titulo) %>%
+  anti_join(variosIdiomas_stop_words) %>%
   count(word) %>%
-  _____________(n>10)
+  filter(n>10)
 
 
 ```
@@ -68,7 +71,7 @@ palabras <- titulos %>%
 Agregamos el código para visualizar el set de datos, las primeras 15 filas.
 
 ```{r}
-________(palabras, n=________)
+head (palabras, n=15)
 
 ```
 
@@ -76,7 +79,7 @@ ________(palabras, n=________)
 Con las palabras finales seleccionadas armamos una nube de palabras. Completa el código para poder obtener una nube de palabras. Aquí si queremos que se muestre el resultado.
 
 ```{r}
-___________ (__________ , size = 1, minRotation = -pi/6, maxRotation = -pi/6,
+wordcloud2 (palabras , size = 1, minRotation = -pi/6, maxRotation = -pi/6,
                   color = "random-light", backgroundColor = "grey")
 
 ```
